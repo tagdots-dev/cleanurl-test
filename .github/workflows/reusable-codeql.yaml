@@ -1,0 +1,59 @@
+---
+
+name: CodeQL
+
+on:
+  schedule:
+    - cron: '30 0 * * *'
+
+  workflow_call:
+
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: read
+
+jobs:
+
+  analyze:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      # https://aka.ms/codeql-docs/language-support
+      fail-fast: false
+      matrix:
+        language: ['actions', 'python']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2 # v4.31.6
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-and-quality
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2 # v4.31.6
+      with:
+        output: codeql-results/
+
+    - name: Upload codeql-${{ matrix.language }}
+      id: upload-artifacts
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
+      with:
+        name: codeql-${{ matrix.language }}
+        path: codeql-results/
+        if-no-files-found: error
+        retention-days: 3
+        overwrite: true
+        compression-level: 6
