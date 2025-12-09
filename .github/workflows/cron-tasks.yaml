@@ -1,0 +1,170 @@
+---
+
+name: cron-tasks
+
+on:
+  schedule:
+    - cron: '30 3 * * 0'
+
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.14.x'
+
+permissions:
+    actions: read
+    contents: read
+    issues: read
+    pull-requests: read
+
+jobs:
+  badge-demo: # https://github.com/tagdots/setup-badge-action
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - id: badge-demo
+      uses: tagdots/setup-badge-action@294661aa1f149b59dfe1cd187539eca7f8f0fabf # 1.0.18
+
+  stale-workflow-runs: # https://github.com/tagdots/delete-workflow-runs
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    outputs:
+      DRY_RUN: ${{ steps.get_data.outputs.dry_run }}
+      REPO_URL: ${{ steps.get_data.outputs.repo_url }}
+      MAX_DAYS: ${{ steps.get_data.outputs.max_days }}
+      MIN_RUNS: ${{ steps.get_data.outputs.min_runs }}
+      LIMIT_EST: ${{ steps.get_data.outputs.limit_usage_est }}
+      LIMIT_REM: ${{ steps.get_data.outputs.limit_rem }}
+      LIMIT_RES: ${{ steps.get_data.outputs.limit_res }}
+      ACTIVE_CT: ${{ steps.get_data.outputs.active_ct }}
+      ORPHAN_CT: ${{ steps.get_data.outputs.orphan_ct }}
+
+    steps:
+    - name: Run delete-workflow-runs
+      id: delete-workflow-runs
+      uses: tagdots/delete-workflow-runs@4303b7da352de2004b0c5f118420cf9f1d63a370 # 1.2.33
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        repo-url: ${{ github.repository }}
+        max-days: 10
+        dry-run: false
+
+    - name: Get data and set GITHUB_OUTPUT
+      id: get_data
+      shell: bash
+      run: |
+        # get data from the last step to set GITHUB_OUTPUT
+        cat data_dict.log | jq .
+        echo "dry_run=$(cat data_dict.log | jq '."dry-run"')" >> $GITHUB_OUTPUT
+        echo "repo_url=$(cat data_dict.log | jq '."repo-url"')" >> $GITHUB_OUTPUT
+        echo "max_days=$(cat data_dict.log | jq '."max-days"')" >> $GITHUB_OUTPUT
+        echo "min_runs=$(cat data_dict.log | jq '."min-runs"')" >> $GITHUB_OUTPUT
+        echo "limit_usage_est=$(cat data_dict.log | jq '."core-limit-usage-estimate"')" >> $GITHUB_OUTPUT
+        echo "limit_rem=$(cat data_dict.log | jq '."core-limit-remaining"')" >> $GITHUB_OUTPUT
+        echo "limit_res=$(cat data_dict.log | jq '."core-limit-reset"')" >> $GITHUB_OUTPUT
+        echo "active_ct=$(cat data_dict.log | jq '."delete-active-workflow-runs-count"')" >> $GITHUB_OUTPUT
+        echo "orphan_ct=$(cat data_dict.log | jq '."delete-orphan-workflow-runs-count"')" >> $GITHUB_OUTPUT
+
+  stale-issues-prs: # https://github.com/actions/stale
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+    - name: Run stale-issues-prs
+      id: stale-issues-prs
+      uses: actions/stale@997185467fa4f803885201cee163a9f38240193d # v10.1.1
+      with:
+        stale-issue-message: 'This issue is stale because it has been open 5 days with no activity. Remove stale label or comment or this will be closed in 3 days after stale'
+        days-before-stale: 5
+        days-before-close: 3
+        delete-branch: true
+
+  stale-branches: # https://github.com/tagdots/delete-branches
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+    - name: Run delete-branches
+      id: delete-branches
+      uses: tagdots/delete-branches@1067f6cf756a462d2da56cffae2df37ea15b600e # 1.2.15
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        repo-url: ${{ github.repository }}
+        max-idle-days: 10
+        exclude-branches: 'badges'
+        dry-run: false
+
+  update-pre-commit: # https://github.com/tagdots/update-pre-commit-action
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+    - name: Run update-pre-commit
+      id: update-pre-commit
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: tagdots/update-pre-commit-action@a80688d12cf761973e340674bcf552af366afba5 # 1.0.28
+      with:
+        file: .pre-commit-config.yaml
+        dry-run: false
+        open-pr: true
+
+  notify-slack: # https://github.com/slackapi/slack-github-action
+    if: always()
+    needs: [badge-demo, stale-workflow-runs, stale-issues-prs, stale-branches, update-pre-commit]
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      WORKFLOW_RESULT: ${{ steps.get-overall-jobs-results.outputs.WORKFLOW_RESULT }}
+
+    steps:
+    - name: Get Overall Jobs Results
+      id: get-overall-jobs-results
+      shell: bash
+      run: |
+        # get overall result from all of the previous jobs
+        if "${{ needs.badge-demo.result == 'success' && needs.stale-workflow-runs.result == 'success' && needs.stale-issues-prs.result == 'success' && needs.stale-branches.result == 'success' && needs.update-pre-commit.result == 'success' }}"; then
+          echo "WORKFLOW_RESULT=:white_check_mark:" >> "$GITHUB_OUTPUT"
+        else
+          echo "WORKFLOW_RESULT=:no_entry:" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Post message to Slack
+      uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+      with:
+        method: chat.postMessage
+        token: "${{ secrets.SECRET_SLACK_APP_GITHUB_BOT }}"
+        payload: |
+          channel: "${{ secrets.SECRET_SLACK_CHANNEL_CRON_TASKS }}"
+          text: "
+              *Repository: ${{ github.repository }}*\n
+              *Workflow : ${{ github.workflow }} ${{ steps.get-overall-jobs-results.outputs.WORKFLOW_RESULT }}*
+              ```
+              URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n
+              Job: badge-demo          - ${{ needs.badge-demo.result }}\n
+              Job: stale-workflow-runs - ${{ needs.stale-workflow-runs.result }}\n
+              Job: stale-issues-prs    - ${{ needs.stale-issues-prs.result }}\n
+              Job: stale-branches      - ${{ needs.stale-branches.result }}\n
+              Job: update-pre-commit   - ${{ needs.update-pre-commit.result }}
+              ```"
