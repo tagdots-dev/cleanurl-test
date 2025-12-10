@@ -125,7 +125,7 @@ jobs:
       run: |
         # install package from TestPyPI and run app to show version
         pip install ${{ env.PACKAGE_NAME }} --index-url ${{ env.INDEX_URL }} --extra-index-url ${{ env.EXTRA_INDEX_URL }}
-        ${{ env.PACKAGE_NAME }} --version
+        python src/*/utils/ver.py
 
   notify-slack:
     if: always()
