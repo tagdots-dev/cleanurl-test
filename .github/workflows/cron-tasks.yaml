@@ -77,7 +77,7 @@ jobs:
       uses: tagdots/setup-badge-action@294661aa1f149b59dfe1cd187539eca7f8f0fabf # 1.0.18
       with:
         badge-name: coverage
-        badge-url: https://github.com/tagdots/update-pre-commit/actions/workflows/cron-tasks.yaml
+        badge-url: https://github.com/tagdots-dev/cleanurl-test/actions/workflows/cron-tasks.yaml
         label: "Code Coverage"
         message: "${{ steps.get-coverage-results.outputs.COV_PER }}"
 
@@ -106,7 +106,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        repo-url: ${{ github.repository }}
+        repo-url: ${{ github.server_url }}/${{ github.repository }}
         max-days: 10
         dry-run: false
 
@@ -159,7 +159,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        repo-url: ${{ github.repository }}
+        repo-url: ${{ github.server_url }}/${{ github.repository }}
         max-idle-days: 10
         exclude-branches: 'badges'
         dry-run: false
@@ -184,7 +184,7 @@ jobs:
 
   notify-slack: # https://github.com/slackapi/slack-github-action
     if: always()
-    needs: [badge-demo, stale-workflow-runs, stale-issues-prs, stale-branches, update-pre-commit]
+    needs: [badge-coverage, badge-demo, stale-workflow-runs, stale-issues-prs, stale-branches, update-pre-commit]
 
     runs-on: ubuntu-latest
 
@@ -197,7 +197,7 @@ jobs:
       shell: bash
       run: |
         # get overall result from all of the previous jobs
-        if "${{ needs.badge-demo.result == 'success' && needs.stale-workflow-runs.result == 'success' && needs.stale-issues-prs.result == 'success' && needs.stale-branches.result == 'success' && needs.update-pre-commit.result == 'success' }}"; then
+        if "${{ needs.badge-coverage.result == 'success' && needs.badge-demo.result == 'success' && needs.stale-workflow-runs.result == 'success' && needs.stale-issues-prs.result == 'success' && needs.stale-branches.result == 'success' && needs.update-pre-commit.result == 'success' }}"; then
           echo "WORKFLOW_RESULT=:white_check_mark:" >> "$GITHUB_OUTPUT"
         else
           echo "WORKFLOW_RESULT=:no_entry:" >> "$GITHUB_OUTPUT"
@@ -215,6 +215,7 @@ jobs:
               *Workflow : ${{ github.workflow }} ${{ steps.get-overall-jobs-results.outputs.WORKFLOW_RESULT }}*
               ```
               URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n
+              Job: badge-coverage      - ${{ needs.badge-coverage.result }}\n
               Job: badge-demo          - ${{ needs.badge-demo.result }}\n
               Job: stale-workflow-runs - ${{ needs.stale-workflow-runs.result }}\n
               Job: stale-issues-prs    - ${{ needs.stale-issues-prs.result }}\n
