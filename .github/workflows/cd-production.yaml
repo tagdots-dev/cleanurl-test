@@ -76,7 +76,7 @@ jobs:
       run: |
         # install package from PyPI and run app to show version
         python -m pip install ${{ env.PACKAGE_NAME }}==${{ github.ref_name }}
-        ${{ env.PACKAGE_NAME }} --version
+        python src/*/utils/ver.py
 
   notify-slack:
     if: always()
