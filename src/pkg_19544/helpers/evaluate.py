@@ -121,6 +121,7 @@ def _has_valid_tls(netloc: str, fqdn: str) -> bool:
     port = int(netloc.split(":", maxsplit=1)[1]) if ":" in netloc else 443
     try:
         ssl_context = ssl.create_default_context()
+        ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
         with socket.create_connection((fqdn, port), timeout=SOCKET_TIMEOUT) as sock:
             with ssl_context.wrap_socket(sock, server_hostname=fqdn) as ssock:
                 cipher_info = ssock.cipher()
