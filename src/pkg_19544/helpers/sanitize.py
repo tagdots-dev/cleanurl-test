@@ -1,6 +1,6 @@
 from urllib.parse import quote_plus, urlsplit
 
-from pkg_19544.configs.constants import BLACKLIST_CONTROL_CHARACTERS
+from ..configs.constants import BLACKLIST_CONTROL_CHARACTERS
 
 
 def _remove_control_characters(user_url: str) -> str:

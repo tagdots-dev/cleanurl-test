@@ -1,6 +1,6 @@
 from urllib.parse import urlunsplit
 
-from pkg_19544.helpers.evaluate import (
+from .helpers.evaluate import (
     _has_allowed_scheme,
     _has_no_basic_auth,
     _has_no_control_character,
@@ -11,8 +11,8 @@ from pkg_19544.helpers.evaluate import (
     _is_fqdn_ipaddr_public_routable,
     _is_fqdn_resolvable,
 )
-from pkg_19544.helpers.sanitize import _encode_url_components, _remove_control_characters
-from pkg_19544.utils.url import get_url_components
+from .helpers.sanitize import _encode_url_components, _remove_control_characters
+from .utils.url import get_url_components
 
 
 def evaluate_url(user_url: str) -> bool:
