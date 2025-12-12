@@ -1,4 +1,4 @@
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 
 from pkg_19544.core import evaluate_url, sanitize_url
 from pkg_19544.utils import err, tld, url

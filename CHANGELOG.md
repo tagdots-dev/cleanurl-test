@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 1.1.0 (2025-12-11)
+
+### Feat
+
+- major changes across all modules
+
+### Fix
+
+- add back TLS minimum version at 1.2
+- action checkout v6 introduces duplicate header error
+
 ## 1.0.1 (2025-12-10)
 
 ### Fix
