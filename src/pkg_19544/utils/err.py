@@ -2,11 +2,11 @@ from functools import wraps
 from logging import ERROR, basicConfig, getLogger
 
 
-basicConfig(level=ERROR, format='{"_t": "%(asctime)s.%(msecs)03d", "_l": "%(levelname)s", "_f": "%(funcName)s", "_m": "%(filename)s:%(lineno)s", "_d": "%(message)s"}')  # noqa: E501
+basicConfig(level=ERROR, format="Error: %(message)s")
 logger = getLogger(__name__)
 
 
-def on_false(exception_type=ValueError, message="Function returned False"):
+def raise_on_false(exception_type=ValueError, message="Function returned False"):
     """
     A decorator that raises an exception if the decorated function returns False.
     """

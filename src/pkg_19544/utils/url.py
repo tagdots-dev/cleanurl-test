@@ -2,13 +2,13 @@ from typing import Tuple
 from urllib.parse import urlparse
 
 
-# http(s)://username:password@example.com:8042/path4/path44?key_1=value_1&key_2=value_2#section
-# \_____/   \_______________/ \_________/     \___________/ \_________________________/ \_____/
-#    |              |               |               |                      |               |
-# scheme        userinfo           fqdn            path                  query          fragment
-#           \________________________________/\_______________________________________________/
-#                           |                                        |
-#                   authority/netloc                            pre-parsed path
+# http(s)://username:password@hostname.example.com:8042/path4/path44?key1=value1&key2=value2#section
+# \_____/   \_______________/ \__________________/ \__/\___________/ \_____________________/ \_____/
+#    |              |                   |            |        |                  |               |
+# scheme        userinfo              fqdn         port      path              query        fragment
+#           \_________________________________________/\___________________________________________/
+#                                |                                         |
+#                         authority/netloc                         pre-parsed path
 
 
 def get_url_components(user_url: str) -> Tuple[str, str, str, str, str]:
