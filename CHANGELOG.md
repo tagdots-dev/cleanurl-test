@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.3.0 (2025-12-16)
+
+### Feat
+
+- feature to enable/disable console log, fine-tune get_url_component, fqdn network layer
+
 ## 1.2.0 (2025-12-16)
 
 ### Feat
