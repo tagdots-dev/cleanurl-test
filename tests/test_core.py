@@ -13,9 +13,13 @@ class TestCore(unittest.TestCase):
         user_url = "https://example.com/search?q=urlencode&gs_lcrp=EgZjaHJvbzc1NmowaA&sourceid=chrome&ie=UTF-8"
         self.assertTrue(evaluate_url(user_url))
 
-    def test_evaluate_url_true_scheme_no(self):
+    def test_evaluate_url_false_scheme_no(self):
         user_url = "example.com"
         self.assertFalse(evaluate_url(user_url, allow_http=True))
+
+    def test_evaluate_url_false_scheme_no_enable_log(self):
+        user_url = "example.com"
+        self.assertFalse(evaluate_url(user_url, allow_http=True, enable_log=True))
 
     def test_evaluate_url_false_bad_scheme(self):
         user_url = "http://example.com/search?q=urlencode&gs_lcrp=EgZjaHJvbzc1NmowaA&sourceid=chrome&ie=UTF-8"

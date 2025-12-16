@@ -20,21 +20,22 @@ def evaluate_url(
         allow_localhost: bool = False,
         allow_private_ip: bool = False,
         allow_loopback_ip: bool = False,
-        allow_tlsv12: bool = False) -> bool:
+        allow_tlsv12: bool = False,
+        enable_log: bool = False) -> bool:
     """
-    evaluate URL from syntax > network > transport layer
+    Evaluate user-supplied URL > syntax > network layer > transport layer
     """
-    scheme, userinfo, authority, fqdn, port, _ = get_url_components(user_url)
+    _, userinfo, authority, fqdn, port, _ = get_url_components(user_url)
     try:
         if all([
-            _has_allowed_scheme(user_url, allow_http),
-            _has_no_basic_auth(userinfo),
-            _has_no_control_character(user_url),
-            _has_valid_fqdn_syntax(fqdn, allow_localhost),
-            _has_valid_authority_syntax(authority, port),
-            _has_valid_tld(fqdn, allow_localhost),
-            _has_valid_fqdn_network(fqdn, port, allow_localhost, allow_loopback_ip, allow_private_ip),
-            _has_valid_tls(authority, fqdn, allow_http, allow_localhost, allow_tlsv12),
+            _has_allowed_scheme(user_url, allow_http, enable_log=enable_log),
+            _has_no_basic_auth(userinfo, enable_log=enable_log),
+            _has_no_control_character(user_url, enable_log=enable_log),
+            _has_valid_fqdn_syntax(fqdn, allow_localhost, enable_log=enable_log),
+            _has_valid_authority_syntax(authority, port, enable_log=enable_log),
+            _has_valid_tld(fqdn, allow_localhost, enable_log=enable_log),
+            _has_valid_fqdn_network(fqdn, port, allow_localhost, allow_loopback_ip, allow_private_ip, enable_log=enable_log),
+            _has_valid_tls(authority, fqdn, allow_localhost, allow_tlsv12, enable_log=enable_log),
         ]):
             return True
         else:
@@ -45,7 +46,7 @@ def evaluate_url(
 
 def sanitize_url(user_url: str) -> str:
     """
-    sanitize and rebuild URL
+    Sanitize and rebuild user-supplied URL
     """
     user_url = _remove_control_characters(user_url)
     scheme, _, authority, _, _, pre_parsed_path = get_url_components(user_url)

@@ -4,6 +4,9 @@ from ..configs.constants import TLD_LIST, TLD_LIVE
 
 
 def get_tlds() -> bool:
+    """
+    Create a list that contains all top-level domains
+    """
     try:
         with request.urlopen(TLD_LIVE) as response:
             html_bytes = response.read()

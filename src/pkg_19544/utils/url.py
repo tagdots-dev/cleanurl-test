@@ -12,15 +12,17 @@ from urllib.parse import urlparse
 
 
 def get_url_components(user_url: str) -> Tuple[str, str, str, str, str, str]:
+    """
+    Parse user-supplied URL
+    """
+    # when scheme is missing in user_url, urllib.parse may have issues to parse URL;
+    # fill in a temp scheme prefix to facilitate URL parsing.
     default_scheme_prefix = 'http://'
-
     if '://' not in user_url:
         user_url = default_scheme_prefix + user_url
-
     scheme = urlparse(user_url).scheme
-    authority = urlparse(user_url).netloc
-    userinfo = authority.split('@')[0] if '@' in authority else ''
 
+    # extract URL components to build pre-parsed path
     path = f'{urlparse(user_url).path}' if urlparse(user_url).path else ''
     query = f'?{urlparse(user_url).query}' if urlparse(user_url).query else ''
     fragment = f'#{urlparse(user_url).fragment}' if urlparse(user_url).fragment else ''
@@ -28,6 +30,10 @@ def get_url_components(user_url: str) -> Tuple[str, str, str, str, str, str]:
     if pre_parsed_path:
         user_url = user_url.rsplit(pre_parsed_path, maxsplit=1)[0]
 
+    # after stripping the front (scheme) and back (pre_parsed_path) of the
+    # user-supplied URL, time to get on userinfo, authority, fqdn, and port.
+    authority = urlparse(user_url).netloc
+    userinfo = authority.split('@')[0] if '@' in authority else ''
     authority = user_url.replace(f'{scheme}://', '')
     authority = authority.split(f'{userinfo}@', maxsplit=1)[1] if userinfo else authority
     fqdn = authority.split(':')[0]
