@@ -10,9 +10,14 @@ from pkg_19544.helpers.evaluate import _has_valid_tls
 
 
 class TestEvaluateUrlTls(unittest.TestCase):
+    def test_has_valid_tls_true_localhost(self):
+        fqdn = "localhost"
+        netloc = "localhsot"
+        self.assertTrue(_has_valid_tls(netloc, fqdn, allow_localhost=True))
+
     @patch('socket.create_connection')
     @patch('ssl.SSLContext.wrap_socket')
-    def test_has_valid_tls_true(self, mock_wrap_socket, mock_create_connection):
+    def test_has_valid_tls_true_non_localhost(self, mock_wrap_socket, mock_create_connection):
         fqdn = "example.com"
         netloc = "example.com"
         cert_dict = {

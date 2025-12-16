@@ -9,15 +9,17 @@ from pkg_19544.helpers.evaluate import (
     _has_allowed_scheme,
     _has_no_basic_auth,
     _has_no_control_character,
-    _has_valid_fqdn_label,
+    _has_valid_authority_syntax,
     _has_valid_fqdn_syntax,
     _has_valid_tld,
-    _is_fqdn_resolvable,
 )
 from pkg_19544.helpers.sanitize import _encode_url_components, _remove_control_characters
 
 
 class TestEvaluateUrl(unittest.TestCase):
+    """
+    test allowed scheme
+    """
     def test_has_allowed_scheme_true(self):
         user_url = "https://example.com/path1/path2?key=value#section1.1"
         self.assertTrue(_has_allowed_scheme(user_url))
@@ -27,6 +29,9 @@ class TestEvaluateUrl(unittest.TestCase):
         with self.assertRaises(ValueError):
             return _has_allowed_scheme(user_url)
 
+    """
+    test userinfo
+    """
     def test_has_no_basic_auth_true(self):
         userinfo = ""
         self.assertTrue(_has_no_basic_auth(userinfo))
@@ -36,6 +41,9 @@ class TestEvaluateUrl(unittest.TestCase):
         with self.assertRaises(ValueError):
             return _has_no_basic_auth(userinfo)
 
+    """
+    test control character
+    """
     def test_has_no_control_character_true(self):
         user_url = "https://example.com/path1/path2?key=value#section1.1"
         self.assertTrue(_has_no_control_character(user_url))
@@ -45,21 +53,31 @@ class TestEvaluateUrl(unittest.TestCase):
         with self.assertRaises(ValueError):
             return _has_no_control_character(user_url)
 
+    """
+    test fqdn syntax - localhost
+    """
+    def test_has_valid_fqdn_syntax_true_localhost(self):
+        fqdn = "localhost"
+        self.assertTrue(_has_valid_fqdn_syntax(fqdn, allow_localhost=True))
+
+    """
+    test fqdn syntax - not localhost
+    """
     def test_has_valid_fqdn_syntax_true(self):
         fqdn = "example.com"
         self.assertTrue(_has_valid_fqdn_syntax(fqdn))
+
+    def test_has_valid_fqdn_syntax_false_chars_not_match(self):
+        fqdn = "examp:lecom"
+        with self.assertRaises(ValueError):
+            return _has_valid_fqdn_syntax(fqdn)
 
     def test_has_valid_fqdn_syntax_false_no_dot(self):
         fqdn = "examplecom"
         with self.assertRaises(ValueError):
             return _has_valid_fqdn_syntax(fqdn)
 
-    def test_has_valid_fqdn_syntax_false_chars(self):
-        fqdn = "examp:lecom"
-        with self.assertRaises(ValueError):
-            return _has_valid_fqdn_syntax(fqdn)
-
-    def test_has_valid_fqdn_syntax_false_length(self):
+    def test_has_valid_fqdn_syntax_false_length_over_255(self):
         fqdn = "1234567890.1234567890.1234567890.1234567890.1234567890." \
                "1234567890.1234567890.1234567890.1234567890.1234567890." \
                "1234567890.1234567890.1234567890.1234567890.1234567890." \
@@ -69,43 +87,73 @@ class TestEvaluateUrl(unittest.TestCase):
         with self.assertRaises(ValueError):
             return _has_valid_fqdn_syntax(fqdn)
 
-    def test_has_valid_fqdn_label_true(self):
+    def test_has_valid_fqdn_syntax_label_true(self):
         fqdn = "12345678901234567890123456789012345678901234567890.example.com"
-        self.assertTrue(_has_valid_fqdn_label(fqdn))
+        self.assertTrue(_has_valid_fqdn_syntax(fqdn))
 
-    def test_has_valid_fqdn_label_false_hyphen_prefix(self):
+    def test_has_valid_fqdn_syntax_label_false_hyphen_prefix(self):
         fqdn = "-host.example.com"
         with self.assertRaises(ValueError):
-            return _has_valid_fqdn_label(fqdn)
+            return _has_valid_fqdn_syntax(fqdn)
 
-    def test_has_valid_fqdn_label_false_hyphen_suffix(self):
+    def test_has_valid_fqdn_syntax_label_false_hyphen_suffix(self):
         fqdn = "host-.example.com"
         with self.assertRaises(ValueError):
-            return _has_valid_fqdn_label(fqdn)
+            return _has_valid_fqdn_syntax(fqdn)
 
-    def test_has_valid_fqdn_label_false_length(self):
+    def test_has_valid_fqdn_syntax_label_false_length(self):
         fqdn = "12345678901234567890123456789012345678901234567890" \
                "123456789012345678901234.example.com"
         with self.assertRaises(ValueError):
-            return _has_valid_fqdn_label(fqdn)
+            return _has_valid_fqdn_syntax(fqdn)
 
+    """
+    test authority syntax
+    """
+    def test_has_valid_authority_syntax_true(self):
+        authority = "example.com:9090"
+        port = "9090"
+        self.assertTrue(_has_valid_authority_syntax(authority, port))
+
+    def test_has_valid_authority_syntax_false_count_colon(self):
+        authority = "example:com:9090"
+        port = "9090"
+        with self.assertRaises(ValueError):
+            return _has_valid_authority_syntax(authority, port)
+
+    def test_has_valid_authority_syntax_false_port0(self):
+        authority = "example:com:9090"
+        port = "0100"
+        with self.assertRaises(ValueError):
+            return _has_valid_authority_syntax(authority, port)
+
+    def test_has_valid_authority_syntax_false_port_not_digit(self):
+        authority = "example:com:9090"
+        port = "abc"
+        with self.assertRaises(ValueError):
+            return _has_valid_authority_syntax(authority, port)
+
+    def test_has_valid_authority_syntax_false_port_over_65535(self):
+        authority = "example:com:9090"
+        port = "99999"
+        with self.assertRaises(ValueError):
+            return _has_valid_authority_syntax(authority, port)
+
+    """
+    test tld
+    """
     def test_has_valid_tld_true(self):
         fqdn = "host.example.com"
         self.assertTrue(_has_valid_tld(fqdn))
+
+    def test_has_valid_tld_true_localhost(self):
+        fqdn = "localhost"
+        self.assertTrue(_has_valid_tld(fqdn, allow_localhost=True))
 
     def test_has_valid_tld_false_invalid_tld(self):
         fqdn = "host.example.x0m"
         with self.assertRaises(ValueError):
             return _has_valid_tld(fqdn)
-
-    def test_is_fqdn_resolvable_true(self):
-        fqdn = "example.com"
-        self.assertTrue(_is_fqdn_resolvable('https', fqdn))
-
-    def test_is_fqdn_resolvable_false(self):
-        fqdn = "invalid.host.example.site"
-        with self.assertRaises(ValueError):
-            return _is_fqdn_resolvable('https', fqdn)
 
 
 class TestSanitizeUrl(unittest.TestCase):
