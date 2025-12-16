@@ -25,7 +25,8 @@ class ValueError(ValueError):
 @raise_on_false(exception_type=ValueError, message="invalid protocol scheme prefix.")
 def _has_allowed_scheme(
         user_url: str,
-        allow_http: bool = False) -> bool:
+        allow_http: bool = False,
+        enable_log: bool = False) -> bool:
     """
     only http(s) is supported
     """
@@ -34,7 +35,9 @@ def _has_allowed_scheme(
 
 
 @raise_on_false(exception_type=ValueError, message='invalid URL (basic auth is not supported).')
-def _has_no_basic_auth(userinfo: str) -> bool:
+def _has_no_basic_auth(
+        userinfo: str,
+        enable_log: bool = False) -> bool:
     """
     userinfo is not supported
     """
@@ -42,9 +45,12 @@ def _has_no_basic_auth(userinfo: str) -> bool:
 
 
 @raise_on_false(exception_type=ValueError, message="invalid URL (unsupported control characters found).")
-def _has_no_control_character(user_url: str) -> bool:
+def _has_no_control_character(
+        user_url: str,
+        enable_log: bool = False) -> bool:
     """
-    log injection risk: https://owasp.org/www-community/attacks/Log_Injection
+    https://owasp.org/www-community/attacks/Log_Injection<br>
+    Control character is not supported due to log injection risk.
     """
     return False if any(char in user_url for char in BLACKLIST_CONTROL_CHARACTERS) else True
 
@@ -52,7 +58,8 @@ def _has_no_control_character(user_url: str) -> bool:
 @raise_on_false(exception_type=ValueError, message="invalid FQDN (check chars usage, max length of label/fqdn: 63/255).")
 def _has_valid_fqdn_syntax(
         fqdn: str,
-        allow_localhost: bool = False) -> bool:
+        allow_localhost: bool = False,
+        enable_log: bool = False) -> bool:
     """
     allowed characters: https://datatracker.ietf.org/doc/html/rfc3986#section-2
     """
@@ -80,7 +87,8 @@ def _has_valid_fqdn_syntax(
 @raise_on_false(exception_type=ValueError, message="invalid authority (check chars usage and port number, if any).")
 def _has_valid_authority_syntax(
         authority: str,
-        port: str) -> bool:
+        port: str,
+        enable_log: bool = False) -> bool:
     """
     allowed characters: https://datatracker.ietf.org/doc/html/rfc3986#section-2<br>
     allowed length    : https://datatracker.ietf.org/doc/html/rfc2181#section-11
@@ -99,9 +107,10 @@ def _has_valid_authority_syntax(
 @raise_on_false(exception_type=ValueError, message="invalid top-level domain.")
 def _has_valid_tld(
         fqdn: str,
-        allow_localhost: bool = False) -> bool:
+        allow_localhost: bool = False,
+        enable_log: bool = False) -> bool:
     """
-    check top-level domain
+    Check top-level domain
     """
     if fqdn.lower() == 'localhost' and allow_localhost:
         return True
@@ -115,9 +124,10 @@ def _has_valid_fqdn_network(
         port: str,
         allow_localhost: bool = False,
         allow_loopback_ip: bool = False,
-        allow_private_ip: bool = False) -> bool:
+        allow_private_ip: bool = False,
+        enable_log: bool = False) -> bool:
     """
-    check FQDN at network layer
+    Check FQDN at network layer
     """
     if all([
         _is_fqdn_resolvable(fqdn, port),
@@ -131,10 +141,11 @@ def _has_valid_fqdn_network(
 @raise_on_false(exception_type=ValueError, message="unable to resolve FQDN")
 def _is_fqdn_resolvable(
         fqdn: str,
-        port: str) -> bool:
+        port: str,
+        enable_log: bool = False) -> bool:
     """
-    Reference: https://docs.python.org/3/library/socket.html<br>
-    Family: AF_UNSPEC (0), Type: SOCK_STREAM (1), Proto: IPPROTO_TCP (6)
+    https://docs.python.org/3/library/socket.html<br>
+    Family: AF_UNSPEC (0)<br>Type: SOCK_STREAM (1)<br>Proto: IPPROTO_TCP (6)
     """
     try:
         return True if socket.getaddrinfo(fqdn, port, family=0, type=1, proto=6, flags=socket.AI_CANONNAME) else False
@@ -148,7 +159,8 @@ def _is_fqdn_resolved_ip_allowed(
         port: str,
         allow_localhost: bool = False,
         allow_loopback_ip: bool = False,
-        allow_private_ip: bool = False) -> bool:
+        allow_private_ip: bool = False,
+        enable_log: bool = False) -> bool:
     """
     - is_link_local - 169.254.0.0/16 (RFC 3927)
     - is_link_local - fe80::/10, fe80::/64 (RFC 4291)
@@ -188,13 +200,13 @@ def _is_fqdn_resolved_ip_allowed(
 def _has_valid_tls(
         authority: str,
         fqdn: str,
-        allow_http: bool = False,
         allow_localhost: bool = False,
-        allow_tlsv12: bool = False) -> bool:
+        allow_tlsv12: bool = False,
+        enable_log: bool = False) -> bool:
     """
-    skip TLS check if HTTP or localhost
+    Check TLS on all but localhost
     """
-    if allow_http or allow_localhost:
+    if allow_localhost:
         return True
     else:
         port = int(authority.split(":", maxsplit=1)[1]) if ":" in authority else 443
@@ -206,10 +218,10 @@ def _has_valid_tls(
                     cipher_info = ssock.cipher()
                     if cipher_info:
                         cipher_name, protocol_version, _ = cipher_info
-                        _has_no_blacklist_cipher(cipher_name)
-                        _has_weak_hash_alg(cipher_name)
-                        _has_weak_protocol(protocol_version, allow_tlsv12)
-                        _has_invalid_expired_cert(ssock)
+                        _has_no_blacklist_cipher(cipher_name, enable_log=enable_log)
+                        _has_weak_hash_alg(cipher_name, enable_log=enable_log)
+                        _has_weak_protocol(protocol_version, allow_tlsv12, enable_log=enable_log)
+                        _has_invalid_expired_cert(ssock, enable_log=enable_log)
                     else:
                         return False
                 return True
@@ -218,25 +230,32 @@ def _has_valid_tls(
 
 
 @raise_on_false(exception_type=ValueError, message="TLS not using strong cipher")
-def _has_no_blacklist_cipher(cipher_name: str) -> bool:
+def _has_no_blacklist_cipher(
+        cipher_name: str,
+        enable_log: bool = False) -> bool:
     return False if any(bkls_cipher.casefold() in cipher_name.casefold() for bkls_cipher in BLACKLIST_CIPHERS) else True
 
 
 @raise_on_false(exception_type=ValueError, message="TLS not using strong hashing algorithm")
-def _has_weak_hash_alg(cipher_name: str) -> bool:
+def _has_weak_hash_alg(
+        cipher_name: str,
+        enable_log: bool = False) -> bool:
     return False if not cipher_name.endswith(WHITELIST_HASHING_ALG) else True
 
 
 @raise_on_false(exception_type=ValueError, message="TLS not using strong protocol")
 def _has_weak_protocol(
         protocol_version: str,
-        allow_tlsv12: bool = False) -> bool:
+        allow_tlsv12: bool = False,
+        enable_log: bool = False) -> bool:
     WHITELIST_TLS_VERSION.append('TLSv1.2') if allow_tlsv12 else WHITELIST_TLS_VERSION
     return False if protocol_version not in WHITELIST_TLS_VERSION else True
 
 
 @raise_on_false(exception_type=ValueError, message="invalid or expired certificate")
-def _has_invalid_expired_cert(ssock: ssl.SSLSocket) -> bool:
+def _has_invalid_expired_cert(
+        ssock: ssl.SSLSocket,
+        enable_log: bool = False) -> bool:
     cert_dict = ssock.getpeercert()
     if isinstance(cert_dict, dict):
         cert_valid_till = cert_dict.get('notAfter')

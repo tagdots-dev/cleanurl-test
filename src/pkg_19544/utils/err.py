@@ -8,14 +8,15 @@ logger = getLogger(__name__)
 
 def raise_on_false(exception_type=ValueError, message="Function returned False"):
     """
-    A decorator that raises an exception if the decorated function returns False.
+    Raises an exception if the decorated function returns False.
     """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
             if result is False:
-                logger.error(f'{message}', stacklevel=2)
+                if kwargs.get('enable_log'):
+                    logger.error(f'{message}')
                 raise exception_type(message)
             return result
         return wrapper
