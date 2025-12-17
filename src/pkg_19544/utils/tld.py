@@ -1,6 +1,7 @@
-from urllib import error, request
+from urllib import request
+from urllib.error import HTTPError, URLError
 
-from ..configs.constants import TLD_LIST, TLD_LIVE
+from pkg_19544.configs.constants import TLD_LIST, TLD_LIVE
 
 
 def get_tlds() -> bool:
@@ -19,5 +20,9 @@ def get_tlds() -> bool:
                 f.write(f'{tld_key} = {tld_val}')
             return True
 
-    except (error.URLError, ValueError):  # pragma: no cover
+    except (HTTPError, URLError, TimeoutError, ValueError):
         return False
+
+
+if __name__ == "__main__":
+    get_tlds()

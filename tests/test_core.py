@@ -5,7 +5,7 @@ Purpose: tests
 """
 import unittest
 
-from pkg_19544.url import evaluate_url, sanitize_url
+from pkg_19544.clean_url import evaluate_url, sanitize_url
 
 
 class TestCore(unittest.TestCase):
