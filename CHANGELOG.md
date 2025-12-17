@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.3.3 (2025-12-16)
+
+### Feat
+
+- refactor log message, docstring, tld script
+
 ## 1.3.0 (2025-12-16)
 
 ### Feat
