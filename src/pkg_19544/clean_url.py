@@ -18,12 +18,26 @@ def evaluate_url(
         user_url: str,
         allow_http: bool = False,
         allow_localhost: bool = False,
-        allow_private_ip: bool = False,
         allow_loopback_ip: bool = False,
+        allow_private_ip: bool = False,
         allow_tlsv12: bool = False,
         enable_log: bool = False) -> bool:
     """
-    Evaluate user-supplied URL > syntax > network layer > transport layer
+    Evaluate URL from syntax to network and transport layer
+
+    *Parameters*:
+
+        user_url         : URL string to evaluate
+        allow_http       : boolean to allow http scheme
+        allow_localhost  : boolean to allow using localhost as FQDN
+        allow_loopback_ip: boolean to use FQDN resolved to loopback ip address
+        allow_private_ip : boolean to use FQDN resolved to private ip address
+        allow_tlsv12     : boolean to use TLSv1.2 in HTTPS protocol
+        enable_log       : boolean to enable console logging
+
+    *Returns*:
+
+        Boolean
     """
     _, userinfo, authority, fqdn, port, _ = get_url_components(user_url)
     try:
@@ -46,7 +60,15 @@ def evaluate_url(
 
 def sanitize_url(user_url: str) -> str:
     """
-    Sanitize and rebuild user-supplied URL
+    Sanitize and rebuild URL
+
+    *Parameters*:
+
+        user_url: URL string to sanitize
+
+    *Returns*:
+
+        Sanitized URL string
     """
     user_url = _remove_control_characters(user_url)
     scheme, _, authority, _, _, pre_parsed_path = get_url_components(user_url)
