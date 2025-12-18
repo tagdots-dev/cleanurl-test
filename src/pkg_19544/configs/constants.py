@@ -3,6 +3,16 @@
 BLACKLIST_CIPHERS = ['ANON', 'EXPORT', 'NULL']
 BLACKLIST_CONTROL_CHARACTERS = ['\n', '\r']
 
+HEADER_DEFAULT = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',  # noqa: E501
+    'Accept': '*/*',
+    'Accept-Encoding': 'gzip, deflate',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+}
+
+HTTPS_TIMEOUT = 5
 SOCKET_TIMEOUT = 2
 
 TLD_LIST = 'src/pkg_19544/configs/tlds.py'

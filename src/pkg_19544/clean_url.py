@@ -20,7 +20,9 @@ def evaluate_url(
         allow_localhost: bool = False,
         allow_loopback_ip: bool = False,
         allow_private_ip: bool = False,
+        allow_redirect: bool = False,
         allow_tlsv12: bool = False,
+        skip_tls: bool = False,
         enable_log: bool = False) -> bool:
     """
     Evaluate URL from syntax to network and transport layer
@@ -32,14 +34,16 @@ def evaluate_url(
         allow_localhost  : boolean to allow using localhost as FQDN
         allow_loopback_ip: boolean to use FQDN resolved to loopback ip address
         allow_private_ip : boolean to use FQDN resolved to private ip address
+        allow_redirect   : boolean to follow redirect
         allow_tlsv12     : boolean to use TLSv1.2 in HTTPS protocol
+        skip_tls         : boolean to skip TLS validation
         enable_log       : boolean to enable console logging
 
     *Returns*:
 
         Boolean
     """
-    _, userinfo, authority, fqdn, port, _ = get_url_components(user_url)
+    scheme, userinfo, authority, fqdn, port, pre_parsed_path = get_url_components(user_url)
     try:
         if all([
             _has_allowed_scheme(user_url, allow_http, enable_log=enable_log),
@@ -49,7 +53,7 @@ def evaluate_url(
             _has_valid_authority_syntax(authority, port, enable_log=enable_log),
             _has_valid_tld(fqdn, allow_localhost, enable_log=enable_log),
             _has_valid_fqdn_network(fqdn, port, allow_localhost, allow_loopback_ip, allow_private_ip, enable_log=enable_log),
-            _has_valid_tls(authority, fqdn, allow_localhost, allow_tlsv12, enable_log=enable_log),
+            _has_valid_tls(scheme, authority, pre_parsed_path, allow_redirect, allow_tlsv12, skip_tls, enable_log=enable_log),  # noqa: E501
         ]):
             return True
         else:
