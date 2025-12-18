@@ -3,10 +3,14 @@ import re
 import socket
 import ssl
 from datetime import datetime, timezone
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from ..configs.constants import (
     BLACKLIST_CIPHERS,
     BLACKLIST_CONTROL_CHARACTERS,
+    HEADER_DEFAULT,
+    HTTPS_TIMEOUT,
     SOCKET_TIMEOUT,
     WHITELIST_CHARS_IN_AUTHORITY,
     WHITELIST_CHARS_IN_FQDN,
@@ -16,6 +20,7 @@ from ..configs.constants import (
 )
 from ..configs.tlds import TLDS
 from ..utils.err import raise_on_false
+from ..utils.url import get_url_components
 
 
 class ValueError(ValueError):
@@ -62,7 +67,7 @@ def _has_valid_fqdn_syntax(
         allow_localhost: bool = False,
         enable_log: bool = False) -> bool:
     """
-    *Reference*:
+    *Notes*:
 
         allowed characters: https://datatracker.ietf.org/doc/html/rfc3986#section-2
     """
@@ -71,7 +76,7 @@ def _has_valid_fqdn_syntax(
     else:
         if all([
             re.fullmatch(WHITELIST_CHARS_IN_FQDN, fqdn) is not None,
-            fqdn.count('.') > 0 if not allow_localhost else fqdn.count('.') == 0,
+            fqdn.count('.') > 0,
             len(fqdn) <= 255,
         ]):
             list_split_fqdn = fqdn.split('.')
@@ -93,7 +98,7 @@ def _has_valid_authority_syntax(
         port: str,
         enable_log: bool = False) -> bool:
     """
-    *Reference*:
+    *Notes*:
 
         allowed characters: https://datatracker.ietf.org/doc/html/rfc3986#section-2
         allowed length    : https://datatracker.ietf.org/doc/html/rfc2181#section-11
@@ -135,8 +140,8 @@ def _has_valid_fqdn_network(
     Check FQDN at network layer
     """
     if all([
-        _is_fqdn_resolvable(fqdn, port),
-        _is_fqdn_resolved_ip_allowed(fqdn, port, allow_localhost, allow_loopback_ip, allow_private_ip)
+        _is_fqdn_resolvable(fqdn, port, enable_log=enable_log),
+        _is_fqdn_resolved_ip_allowed(fqdn, port, allow_localhost, allow_loopback_ip, allow_private_ip, enable_log=enable_log)
     ]):
         return True
     else:
@@ -151,7 +156,7 @@ def _is_fqdn_resolvable(
     """
     https://docs.python.org/3/library/socket.html
 
-    *Reference*:
+    *Notes*:
 
         Family: AF_UNSPEC (0)
         Type  : SOCK_STREAM (1)
@@ -191,8 +196,8 @@ def _is_fqdn_resolved_ip_allowed(
         is_reserved  : 240.0.0.0/4
         is_reserved  : 0:0:0:0:0:0:0:1, fe80::1, ::1 (RFC 2373)
     """
-    allow_loopback_ip = True if allow_localhost else allow_loopback_ip
-    allow_private_ip = True if allow_localhost else allow_private_ip
+    allow_loopback_ip = True if fqdn.lower() == 'localhost' and allow_localhost else allow_loopback_ip
+    allow_private_ip = True if fqdn.lower() == 'localhost' and allow_localhost else allow_private_ip
     try:
         list_addr_info = socket.getaddrinfo(fqdn, port, family=0, type=1, proto=6, flags=socket.AI_CANONNAME)
         if list_addr_info:
@@ -213,24 +218,35 @@ def _is_fqdn_resolved_ip_allowed(
         return False
 
 
-@raise_on_false(exception_type=ValueError, message='invalid certificate or configuration')
+@raise_on_false(exception_type=ValueError, message='invalid https certificate or connections')
 def _has_valid_tls(
+        scheme: str,
         authority: str,
-        fqdn: str,
-        allow_localhost: bool = False,
+        pre_parsed_path: str,
+        allow_redirect: bool = False,
         allow_tlsv12: bool = False,
+        skip_tls: bool = False,
         enable_log: bool = False) -> bool:
     """
-    Check TLS on all but localhost
+    Check TLS unless skip_tls=True
     """
-    if allow_localhost:
+    if skip_tls:
         return True
     else:
-        port = int(authority.split(':', maxsplit=1)[1]) if ':' in authority else 443
+        fqdn = authority.split(':', maxsplit=1)[0] if ':' in authority else authority
+        port = int(authority.split(':', maxsplit=1)[1]) if ':' in authority else 443 if scheme == 'https' else 80
         try:
             ssl_context = ssl.create_default_context()
             ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
-            with socket.create_connection((fqdn, port), timeout=SOCKET_TIMEOUT) as sock:
+
+            if allow_redirect:
+                user_url = f'{scheme}://' + authority + pre_parsed_path
+                req = Request(user_url, headers=HEADER_DEFAULT)
+                with urlopen(req, context=ssl_context, timeout=HTTPS_TIMEOUT) as response:
+                    redirected_url = response.geturl()
+                    _, _, _, fqdn, port, _ = get_url_components(redirected_url)
+
+            with socket.create_connection((fqdn, int(port)), timeout=SOCKET_TIMEOUT) as sock:
                 with ssl_context.wrap_socket(sock, server_hostname=fqdn) as ssock:
                     cipher_info = ssock.cipher()
                     if cipher_info:
@@ -242,7 +258,8 @@ def _has_valid_tls(
                     else:
                         return False
                 return True
-        except (ssl.SSLError, socket.gaierror, socket.timeout, ConnectionRefusedError):  # pragma: no cover
+
+        except (ConnectionRefusedError, ssl.SSLError, socket.gaierror, socket.timeout, HTTPError, URLError):
             return False
 
 
@@ -275,16 +292,19 @@ def _has_invalid_expired_cert(
         enable_log: bool = False) -> bool:
     cert_dict = ssock.getpeercert()
     if isinstance(cert_dict, dict):
-        cert_valid_till = cert_dict.get('notAfter')
-        if isinstance(cert_valid_till, str):
+        cert_valid_end = cert_dict.get('notAfter')
+        cert_valid_beg = cert_dict.get('notBefore')
+        if isinstance(cert_valid_beg, str) and isinstance(cert_valid_end, str):
             cert_date_format = "%b %d %H:%M:%S %Y GMT"
-            parsed_cert_datetime = datetime.strptime(cert_valid_till, cert_date_format)
-            parsed_cert_datetime_utc = parsed_cert_datetime.astimezone(timezone.utc)
+            parsed_cert_datetime_beg = datetime.strptime(cert_valid_beg, cert_date_format)
+            parsed_cert_datetime_end = datetime.strptime(cert_valid_end, cert_date_format)
+            parsed_cert_datetime_beg_utc = parsed_cert_datetime_beg.astimezone(timezone.utc)
+            parsed_cert_datetime_end_utc = parsed_cert_datetime_end.astimezone(timezone.utc)
             current_datetime_utc = datetime.now(timezone.utc)
-            if parsed_cert_datetime_utc < current_datetime_utc:
-                return False
-            else:
+            if parsed_cert_datetime_beg_utc < current_datetime_utc < parsed_cert_datetime_end_utc:
                 return True
+            else:
+                return False
         else:
             return False
     else:
