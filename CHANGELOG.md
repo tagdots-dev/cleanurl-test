@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.3.5 (2025-12-17)
+
+### Feat
+
+- add options (allow_redirect, skip_tls) and fix _has_invalid_expired_cert
+
 ## 1.3.3 (2025-12-16)
 
 ### Feat
