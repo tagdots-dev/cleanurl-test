@@ -1,4 +1,4 @@
-__version__ = "1.3.5"
+__version__ = "1.3.6"
 
 from pkg_19544.clean_url import evaluate_url, sanitize_url
 
