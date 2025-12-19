@@ -16,7 +16,8 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_localhost_true(self):
         scheme = "http"
         authroity = "localhost"
-        result = _has_valid_tls(scheme, authroity, skip_tls=True)
+        pre_parsed_path = ""
+        result = _has_valid_tls(scheme, authroity, pre_parsed_path, skip_tls=True)
         assert result is True
 
     """
@@ -25,8 +26,9 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_localhost_false(self):
         scheme = "http"
         authroity = "localhost"
+        pre_parsed_path = ""
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + valid cert = True
@@ -36,6 +38,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_valid_fqdn_and_cert_true(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
         cert_dict = {
             'subject': (
                 (('commonName', 'example.com'),),
@@ -64,7 +67,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.cipher.return_value = ('TLS_AES_256_GCM_SHA384', 'TLSv1.3', '256')
         # Configure get peer certificate
         mock_ssock.getpeercert.return_value = cert_dict
-        self.assertTrue(_has_valid_tls(scheme, authroity))
+        self.assertTrue(_has_valid_tls(scheme, authroity, pre_parsed_path))
 
     """
     when FQDN is example.com + empty cipher = False >> Raise ValueError
@@ -74,6 +77,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_invalid_cipher_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
 
         # Configure the mock socket instance
         mock_sock = MagicMock()
@@ -85,7 +89,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.cipher.return_value = ''
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + weak cipher = False >> Raise ValueError
@@ -95,6 +99,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_weak_cipher_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
 
         # Configure the mock socket instance
         mock_sock = MagicMock()
@@ -106,7 +111,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.cipher.return_value = ('TLS_NULL_SHA256', 'TLSv1.3', '256')
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + weak hashing algorithm = False >> Raise ValueError
@@ -116,6 +121,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_weak_hashing_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
 
         # Configure the mock socket instance
         mock_sock = MagicMock()
@@ -127,7 +133,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.cipher.return_value = ('TLS_AES_256_GCM_SHA1', 'TLSv1.3', '256')
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + weak protocol version = False >> Raise ValueError
@@ -137,6 +143,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_weak_protocol_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
 
         # Configure the mock socket instance
         mock_sock = MagicMock()
@@ -148,7 +155,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.cipher.return_value = ('TLS_AES_128_GCM_SHA256', 'TLSv1.2', '128')
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + weak protocol version + allow_tlsv12 = True
@@ -158,6 +165,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_weak_protocol_allowed_true(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
         cert_dict = {
             'subject': (
                 (('commonName', 'example.com'),),
@@ -186,7 +194,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.cipher.return_value = ('TLS_AES_128_GCM_SHA256', 'TLSv1.2', '128')
         # Configure get peer certificate
         mock_ssock.getpeercert.return_value = cert_dict
-        self.assertTrue(_has_valid_tls(scheme, authroity, allow_tlsv12=True))
+        self.assertTrue(_has_valid_tls(scheme, authroity, pre_parsed_path, allow_tlsv12=True))
 
     """
     when FQDN is example.com + empty cert dict = False >> Raise ValueError
@@ -196,6 +204,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_cert_not_dict_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
         cert_dict = []
 
         # Configure the mock socket instance
@@ -210,7 +219,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.getpeercert.return_value = cert_dict
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + cert notBefore is not str = False >> Raise ValueError
@@ -220,6 +229,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_cert_invalid_notbefore_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
         cert_dict = {
             'subject': (
                 (('commonName', 'example.com'),),
@@ -250,7 +260,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.getpeercert.return_value = cert_dict
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + cert notAfter is not str = False >> Raise ValueError
@@ -260,6 +270,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_cert_invalid_notafter_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
         cert_dict = {
             'subject': (
                 (('commonName', 'example.com'),),
@@ -290,7 +301,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.getpeercert.return_value = cert_dict
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + cert expired = False >> Raise ValueError
@@ -300,6 +311,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_cert_expired_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
         cert_dict = {
             'subject': (
                 (('commonName', 'example.com'),),
@@ -330,7 +342,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.getpeercert.return_value = cert_dict
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
 
     """
     when FQDN is example.com + now outside of cert window = False >> Raise ValueError
@@ -340,6 +352,7 @@ class TestEvaluateUrlTls(unittest.TestCase):
     def test_has_valid_tls_example_cert_not_ready_false(self, mock_wrap_socket, mock_create_connection):
         scheme = "https"
         authroity = "example.com"
+        pre_parsed_path = ""
         cert_dict = {
             'subject': (
                 (('commonName', 'example.com'),),
@@ -370,4 +383,4 @@ class TestEvaluateUrlTls(unittest.TestCase):
         mock_ssock.getpeercert.return_value = cert_dict
 
         with self.assertRaises(ValueError):
-            return _has_valid_tls(scheme, authroity)
+            return _has_valid_tls(scheme, authroity, pre_parsed_path)
