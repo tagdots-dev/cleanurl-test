@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 1.3.6 (2025-12-18)
+
+### Feat
+
+- change feature on allow_redirect from False to True
+
+### Fix
+
+- fix use of pre-parsed-path
+
 ## 1.3.5 (2025-12-17)
 
 ### Feat
