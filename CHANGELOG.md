@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.3.7 (2025-12-18)
+
+### Fix
+
+- remove pre_parsed_path from from _has_valid_tls
+
 ## 1.3.6 (2025-12-18)
 
 ### Feat
