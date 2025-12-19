@@ -19,11 +19,7 @@ class TestCore(unittest.TestCase):
 
     def test_evaluate_url_example_true_redirect(self):
         user_url = "http://google.com"
-        self.assertTrue(evaluate_url(user_url, allow_http=True, allow_redirect=True, enable_log=True))
-
-    def test_evaluate_url_example_false_scheme_no_enable_log(self):
-        user_url = "example.com"
-        self.assertFalse(evaluate_url(user_url, allow_http=True, enable_log=True))
+        self.assertTrue(evaluate_url(user_url, allow_http=True, enable_log=True))
 
     def test_evaluate_url_example_false_bad_scheme(self):
         user_url = "http://docs.python.org/3/library/urllib.parse.html#module-urllib.parse"

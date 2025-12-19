@@ -53,7 +53,7 @@ def evaluate_url(
             _has_valid_authority_syntax(authority, port, enable_log=enable_log),
             _has_valid_tld(fqdn, allow_localhost, enable_log=enable_log),
             _has_valid_fqdn_network(fqdn, port, allow_localhost, allow_loopback_ip, allow_private_ip, enable_log=enable_log),
-            _has_valid_tls(scheme, authority, pre_parsed_path, allow_redirect, allow_tlsv12, skip_tls, enable_log=enable_log),  # noqa: E501
+            _has_valid_tls(scheme, authority, allow_redirect, allow_tlsv12, skip_tls, enable_log=enable_log),
         ]):
             return True
         else:

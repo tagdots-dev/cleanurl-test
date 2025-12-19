@@ -222,7 +222,6 @@ def _is_fqdn_resolved_ip_allowed(
 def _has_valid_tls(
         scheme: str,
         authority: str,
-        pre_parsed_path: str,
         allow_redirect: bool = False,
         allow_tlsv12: bool = False,
         skip_tls: bool = False,
@@ -240,7 +239,7 @@ def _has_valid_tls(
             ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
 
             if allow_redirect:
-                user_url = f'{scheme}://' + authority + pre_parsed_path
+                user_url = f'{scheme}://' + authority
                 req = Request(user_url, headers=HEADER_DEFAULT)
                 with urlopen(req, context=ssl_context, timeout=HTTPS_TIMEOUT) as response:
                     redirected_url = response.geturl()

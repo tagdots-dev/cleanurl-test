@@ -5,6 +5,7 @@ usage:
 	@echo "\tmake build"
 	@echo "\tmake test"
 	@echo "\tmake test-install"
+	@echo "\tmake local-install"
 
 build:
 	@echo "***************************************************************************"
@@ -24,7 +25,7 @@ build:
 	@echo "***************************************************************************"
 	@echo "*** Install package into the current active Python environment"
 	@echo "***************************************************************************"
-	python -m uv pip install -e .
+	python -m uv pip install -U --refresh -e .
 
 test:
 	@echo "***************************************************************************"
@@ -46,7 +47,7 @@ test-install:
 	@echo "***************************************************************************"
 	python -m pip install -U uv
 	python -m uv pip install -U pip
-	python -m uv pip install -e .[test]
+	python -m uv pip install -U --refresh -e .[test]
 
 local-install:
 	@echo "***************************************************************************"
@@ -54,6 +55,6 @@ local-install:
 	@echo "***************************************************************************"
 	python -m pip install -U uv
 	python -m uv pip install -U pip
-	python -m uv pip install -e .[test,local]
+	python -m uv pip install -U --refresh -e .[local,test]
 
 .PHONY: help build test test-install local-install
