@@ -222,6 +222,7 @@ def _is_fqdn_resolved_ip_allowed(
 def _has_valid_tls(
         scheme: str,
         authority: str,
+        pre_parsed_path: str,
         allow_redirect: bool = False,
         allow_tlsv12: bool = False,
         skip_tls: bool = False,
@@ -239,31 +240,16 @@ def _has_valid_tls(
             ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
 
             if allow_redirect:
-                user_url = f'{scheme}://' + authority
-                # + pre_parsed_path
-                # print('')
-                # print('----------------------------------')
-                # print(user_url)
-                # print('----------------------------------')
+                user_url = f'{scheme}://' + authority + pre_parsed_path
                 req = Request(user_url, headers=HEADER_DEFAULT)
-                # print(req)
                 with urlopen(req, context=ssl_context, timeout=HTTPS_TIMEOUT) as response:
                     redirected_url = response.geturl()
-                    # print('')
-                    # print('----------------------------------')
-                    # print(redirected_url)
                     _, _, _, fqdn, port, _ = get_url_components(redirected_url)
-                    # print(fqdn, port)
-                    # print('----------------------------------')
 
             with socket.create_connection((fqdn, int(port)), timeout=SOCKET_TIMEOUT) as sock:
                 with ssl_context.wrap_socket(sock, server_hostname=fqdn) as ssock:
                     cipher_info = ssock.cipher()
                     if cipher_info:
-                        # print('----------------------------------')
-                        # print(cipher_info)
-                        # print('----------------------------------')
-
                         cipher_name, protocol_version, _ = cipher_info
                         _has_no_blacklist_cipher(cipher_name, enable_log=enable_log)
                         _has_weak_hash_alg(cipher_name, enable_log=enable_log)
