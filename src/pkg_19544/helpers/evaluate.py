@@ -223,7 +223,7 @@ def _has_valid_tls(
         scheme: str,
         authority: str,
         pre_parsed_path: str,
-        allow_redirect: bool = False,
+        allow_redirect: bool = True,
         allow_tlsv12: bool = False,
         skip_tls: bool = False,
         enable_log: bool = False) -> bool:

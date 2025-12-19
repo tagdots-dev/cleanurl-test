@@ -20,7 +20,7 @@ def evaluate_url(
         allow_localhost: bool = False,
         allow_loopback_ip: bool = False,
         allow_private_ip: bool = False,
-        allow_redirect: bool = False,
+        allow_redirect: bool = True,
         allow_tlsv12: bool = False,
         skip_tls: bool = False,
         enable_log: bool = False) -> bool:
