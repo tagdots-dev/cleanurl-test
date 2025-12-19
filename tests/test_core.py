@@ -30,7 +30,7 @@ class TestCore(unittest.TestCase):
         self.assertFalse(evaluate_url(user_url, enable_log=True))
 
     def test_evaluate_url_example_false_basic_auth(self):
-        user_url = "https://user:pass@docs.python.org/3/library/urllib.parse.html#module-urllib.parse"
+        user_url = "https://user:pass@docs.python.org/3/library/urllib.parse.html#module-urllib.parse"  # checkov:skip=CKV_SECRET_4  # noqa: E501
         self.assertFalse(evaluate_url(user_url, enable_log=True))
 
     def test_evaluate_url_example_false_control_char(self):
