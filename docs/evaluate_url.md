@@ -2,29 +2,45 @@
 
 ### ✅ Purpose: evaluate URL from syntax to network and transport layers.
 
-Return _True_ when the URL fulfills all of the following
+### Description
+
+Beside syntax checking, we take URL evaluation up another level to the network and transport layers in order to _**fend off unwanted entries into your API application**_.  For instance, _**evaluate_url**_ returns _**False**_.
+
 ```
-1. meets RFC requirements in URL syntax except that
+- insecure practice to embed `userinfo` into the URL (after protocol scheme).
+- fqdn resolved to non-public routable IP address (subject to SSRF risk).
+- selected control characters found (subject to log ingestion risk).
+- use TLS protocol lower than TLSv1.3.
+- use hasing algorithm lower than SHA2.
+- use invalid HTTPS certificate.
+...etc
+```
+
+<br>
+
+By default, _**evaluate_url**_ returns _**True**_ when the URL fulfills all of the following
+```
+1. meet RFC requirements in URL syntax except that
     - userinfo is not supported in authority
     - IPv4/6  are not supported in authority
-2. uses https protocol scheme.
-3. uses hostname resolvable to public routable IP address.
-4. uses certificate that employs the latest protocol, strong cipher, & hashing algorithm.
+2. use https protocol scheme.
+3. use hostname resolvable to public routable IP address.
+4. use valid and secure certificate that employs the latest protocol, strong cipher, & hashing algorithm.
 ```
 
 <br>
 
  **🔧 Available options to support YOUR scenarios**
-| Parameters          | Description                            | Default  |
-|---------------------|----------------------------------------|----------|
-| `allow_http`        | `allow http protocol in scheme`        | `False`  |
-| `allow_localhost`   | `allow localhost as FQDN`              | `False`  |
-| `allow_loopback_ip` | `allow FQDN resolved to loopback IP`   | `False*` |
-| `allow_private_ip`  | `allow FQDN resolved to private IP`    | `False*` |
-| `allow_redirect`    | `allow redirect during TLS validation` | `True*`  |
-| `allow_tlsv12`      | `allow TLSv1.2 encryption protocol`    | `False`  |
-| `skip_tls`          | `skip TLS validation`                  | `False`  |
-| `enable_log`        | `enable console log`                   | `False`  |
+| Parameters           | Description                            | Default |
+|----------------------|----------------------------------------|---------|
+| `allow_http`         | `allow http protocol in scheme`        | `False` |
+| `allow_localhost`    | `allow localhost as FQDN`              | `False` |
+| `allow_loopback_ip*` | `allow FQDN resolved to loopback IP`   | `False` |
+| `allow_private_ip*`  | `allow FQDN resolved to private IP`    | `False` |
+| `allow_redirect*`    | `allow redirect during TLS validation` | `True`  |
+| `allow_tlsv12`       | `allow TLSv1.2 encryption protocol`    | `False` |
+| `skip_tls`           | `skip TLS validation`                  | `False` |
+| `enable_log`         | `enable console log`                   | `False` |
 
 <br>
 
