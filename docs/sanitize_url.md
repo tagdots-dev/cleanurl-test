@@ -1,6 +1,8 @@
-# ⭐ method: _sanitize_url_
+# ⭐ _sanitize_url_
 
 ### ✅ Purpose: sanitize URL.
+
+<br>
 
 Return sanitized URL
 ```
