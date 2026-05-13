@@ -1,4 +1,4 @@
-__version__ = "1.3.7"
+__version__ = "1.4.0"
 
 from pkg_19544.clean_url import (
     evaluate_url,
