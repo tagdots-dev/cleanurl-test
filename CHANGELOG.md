@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.4.0 (2026-05-12)
+
+### Feat
+
+- add define-url functions
+
 ## 1.3.7 (2025-12-18)
 
 ### Fix
