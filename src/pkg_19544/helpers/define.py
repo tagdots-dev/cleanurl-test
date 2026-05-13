@@ -30,7 +30,7 @@ def _define_url(
 
         except Exception:
             return False
-    else:
+    else:  # pragma: no cover
         return False
 
 
