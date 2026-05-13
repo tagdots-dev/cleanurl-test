@@ -14,7 +14,7 @@ def raise_on_false(exception_type=ValueError, message='Function returned False')
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            if result is False:
+            if not result:
                 if kwargs.get('enable_log'):
                     logger.error(f'{message}', stacklevel=2)
                 raise exception_type(message)

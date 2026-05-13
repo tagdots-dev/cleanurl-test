@@ -1,18 +1,16 @@
-# ⭐ method: _evaluate_url_
+# ⭐ _evaluate_url_
 
 ### ✅ Purpose: evaluate URL from syntax to network and transport layers.
 
-### Description
-
-Beside syntax checking, we take URL evaluation up another level to the network and transport layers in order to _**fend off unwanted entries into your API application**_.  For instance, _**evaluate_url**_ returns _**False**_.
+Beside syntax checking, we take URL evaluation up another level to the network and transport layers in order to _**fend off unwanted entries into your API application**_.  For instance, _**evaluate_url**_ returns _**False**_ with:
 
 ```
 - insecure practice to embed `userinfo` into the URL (after protocol scheme).
 - fqdn resolved to non-public routable IP address (subject to SSRF risk).
 - selected control characters found (subject to log ingestion risk).
-- use TLS protocol lower than TLSv1.3.
-- use hasing algorithm lower than SHA2.
-- use invalid HTTPS certificate.
+- TLS protocol lower than TLSv1.3.
+- hashing algorithm lower than SHA2.
+- expired or invalid HTTPS certificate.
 ...etc
 ```
 

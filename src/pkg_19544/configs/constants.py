@@ -12,6 +12,7 @@ HEADER_DEFAULT = {
     'Connection': 'keep-alive'
 }
 
+TIMEOUT_DEFAULT = 5
 HTTPS_TIMEOUT = 5
 SOCKET_TIMEOUT = 2
 

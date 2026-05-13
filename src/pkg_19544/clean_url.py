@@ -1,5 +1,6 @@
 from urllib.parse import urlunsplit
 
+from .helpers.define import _define_url
 from .helpers.evaluate import (
     _has_allowed_scheme,
     _has_no_basic_auth,
@@ -74,9 +75,49 @@ def sanitize_url(user_url: str) -> str:
 
         Sanitized URL string
     """
-    user_url = _remove_control_characters(user_url)
-    scheme, _, authority, _, _, pre_parsed_path = get_url_components(user_url)
+    sanitized_url = _remove_control_characters(user_url)
+    scheme, _, authority, _, _, pre_parsed_path = get_url_components(sanitized_url)
     encoded_path, encoded_query, encoded_fragment = _encode_url_components(pre_parsed_path)
 
     url_components = (scheme, authority, encoded_path, encoded_query, encoded_fragment)
     return urlunsplit(url_components)
+
+
+def origin_url(
+        user_url: str,
+        enable_log: bool = False) -> str | bool:
+    """
+    Get Origin URL (without redirection)
+
+    *Parameters*:
+
+        user_url: URL string
+
+    *Returns*:
+
+        Origin URL string: protocol + domain name + port (if not 80 or 443)
+    """
+    return _define_url(user_url=user_url, enable_log=enable_log, url_type='origin')
+
+
+def redirect_url(
+        user_url: str,
+        trailing_path: str = '',
+        enable_log: bool = False) -> str | bool:
+    """
+    Get Redirect URL
+
+    *Parameters*:
+
+        user_url     : URL string
+        trailing_path: optional trailing path to attach to redirected URL
+        enable_log   : boolean to enable console logging
+
+    *Returns*:
+
+        Redirect URL string: protocol + domain name + port (if not 80 or 443) + optional trailing path
+    """
+    try:
+        return _define_url(user_url=user_url, trailing_path=trailing_path, enable_log=enable_log, url_type='redirect')
+    except ValueError:
+        return False
