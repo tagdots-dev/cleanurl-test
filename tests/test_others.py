@@ -5,6 +5,7 @@ Purpose: tests
 """
 import unittest
 
+from pkg_19544.helpers.define import _define_url
 from pkg_19544.helpers.evaluate import (
     _has_allowed_scheme,
     _has_no_basic_auth,
@@ -187,3 +188,26 @@ class TestSanitizeUrl(unittest.TestCase):
         assert "%27" in updated_url[1]
         assert "?" not in updated_url[1]
         assert "#" not in updated_url[2]
+
+
+class TestDefineUrl(unittest.TestCase):
+    """
+    test define url
+    """
+    def test_url_type_origin_success(self):
+        user_url = "https://google.com/path1/path2?key=value#section1.1"
+        self.assertTrue(_define_url(user_url, url_type='origin'))
+
+    def test_url_type_redirect_success(self):
+        user_url = "https://google.com/path1/path2?key=value#section1.1"
+        self.assertTrue(_define_url(user_url, trailing_path='/webhp', url_type='redirect'))
+
+    def test_url_type_redirect_failure(self):
+        user_url = "https://invalidurladdress.com/path1/path2?key=value#section1.1"
+        with self.assertRaises(ValueError):
+            _define_url(user_url, trailing_path='/webhp', url_type='redirect')
+
+    def test_url_type_invalid_valueerror(self):
+        user_url = "https://google.com/path1/path2?key=value#section1.1"
+        with self.assertRaises(ValueError):
+            _define_url(user_url, trailing_path='/webhp', url_type='invalid_url_type')
