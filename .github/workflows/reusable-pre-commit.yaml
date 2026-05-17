@@ -48,7 +48,7 @@ jobs:
         hadolint --version
 
     - name: Install terraform
-      uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+      uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
       with:
         terraform_version: ${{ env.TERRAFORM_VERSION }}
 
@@ -68,7 +68,7 @@ jobs:
 
     - name: Run Checkov Github Action
       id: checkov
-      uses: bridgecrewio/checkov-action@002cd2e8cc0fe0535e6f364509e091c1a9870efa # v12.3093.0
+      uses: bridgecrewio/checkov-action@4048c972aae68d0b983a48bb3479aab2d877b898 # v12.3102.0
       with:
         log_level: WARNING
         quiet: false
