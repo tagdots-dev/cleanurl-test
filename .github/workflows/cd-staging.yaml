@@ -41,7 +41,7 @@ jobs:
       # instead of PAT, github_app_id and github_app_pem_file are used by this workflow because
       # we have tag-based ruleset in place to restrict ACTOR from bypassing tag protection.
       id: generate-token
-      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
       with:
         app-id: ${{ secrets.SECRET_GITHUB_APP_ID }}
         private-key: ${{ secrets.SECRET_GITHUB_APP_PEM_FILE }}
@@ -160,7 +160,7 @@ jobs:
         fi
 
     - name: Post message to Slack
-      uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
+      uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
       with:
         method: chat.postMessage
         token: "${{ secrets.SECRET_SLACK_APP_GITHUB_BOT }}"
