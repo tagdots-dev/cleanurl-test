@@ -4,15 +4,16 @@
 # ---------------------- OSX ---------------------- #
 # General
 .DS_Store
+.localized
 __MACOSX/
 .AppleDouble
 .LSOverride
 Icon[]
 
-# Thumbnails
+# Resource forks
 ._*
 
-# Files that might appear in the root of a volume
+# Files and directories that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
 .Spotlight-V100
@@ -20,6 +21,15 @@ Icon[]
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
+.com.apple.timemachine.supported
+.PKInstallSandboxManager
+.PKInstallSandboxManager-SystemSoftware
+.hotfiles.btree
+.vol
+.file
+.disk_label*
+lost+found
+.HFS+ Private Directory Data[]
 
 # Directories potentially created on remote AFP share
 .AppleDB
@@ -27,6 +37,28 @@ Icon[]
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Mac OS 6 to 9
+Desktop DB
+Desktop DF
+TheFindByContentFolder
+TheVolumeSettingsFolder
+.FBCIndex
+.FBCSemaphoreFile
+.FBCLockFolder
+
+# Quota system
+.quota.group
+.quota.user
+.quota.ops.group
+.quota.ops.user
+
+# TimeMachine
+Backups.backupdb
+.MobileBackups
+.MobileBackups.trash
+MobileBackups.trash
+tmbootpicker.efi
 
 
 # -------------------- Windows -------------------- #
@@ -126,6 +158,7 @@ nosetests.xml
 coverage.xml
 *.cover
 *.py.cover
+*.lcov
 .hypothesis/
 .pytest_cache/
 cover/
@@ -201,13 +234,14 @@ ipython_config.py
 # pixi.lock
 #   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
 #   in the .venv directory. It is recommended not to include this directory in version control.
-.pixi
+.pixi/*
+!.pixi/config.toml
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
 
 # Celery stuff
-celerybeat-schedule
+celerybeat-schedule*
 celerybeat.pid
 
 # Redis
@@ -279,6 +313,8 @@ cython_debug/
 #   and can be added to the global gitignore or merged into this file. However, if you prefer, 
 #   you could uncomment the following to ignore the entire vscode folder
 # .vscode/
+# Temporary file for partial code execution
+tempCodeRunnerFile.py
 
 # Ruff stuff:
 .ruff_cache/
@@ -300,8 +336,9 @@ __marimo__/
 
 
 # --------------- Miscellaneous ------------------- #
+.secrets
+.vscode/
 *.key
 *.pem
 *.tmp
 id_rsa
-.vscode/
