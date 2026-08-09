@@ -60,7 +60,7 @@ jobs:
         id: set-build-version
         shell: bash
         run: |
-          echo 'BUILD_VERSION=$(uv run python -c "from ${{ env.PACKAGE_NAME }} import __version__; print(__version__)")' >> "$GITHUB_OUTPUT"
+          echo "BUILD_VERSION=$(uv run python -c "from ${{ env.PACKAGE_NAME }} import __version__; print(__version__)")" >> "$GITHUB_OUTPUT"
 
       - name: Get Build Version
         id: get-build-version
