@@ -16,6 +16,7 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
 
 env:
+  PACKAGE_NAME: pkg_19544
   PYTHON_VERSION: "3.14.x"
   UV_VERSION: "0.12.0"
 
@@ -51,14 +52,15 @@ jobs:
         shell: bash
         run: make build
 
-      # set and get build version
       - name: Set Build Version
         id: set-build-version
+        shell: bash
         run: |
-          echo "BUILD_VERSION=$(uv run python src/*/utils/ver.py)" >> "$GITHUB_OUTPUT"
+          echo "BUILD_VERSION=$(PYTHONPATH=. python -c 'from pkg_19544 import __version__; print(__version__)')" >> "$GITHUB_OUTPUT"
 
       - name: Get Build Version
         id: get-build-version
+        shell: bash
         run: |
           echo "Build Version: ${{ steps.set-build-version.outputs.BUILD_VERSION }}"
 
