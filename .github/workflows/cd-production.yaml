@@ -7,7 +7,8 @@ on: # yamllint disable-line rule:truthy
       - published
 
 env:
-  PACKAGE_NAME: pkg-19544
+  PROJECT_NAME: pkg-19544
+  PACKAGE_NAME: pkg_19544
   PYTHON_VERSION: "3.14.x"
   UV_VERSION: "0.12.0"
 
@@ -69,8 +70,8 @@ jobs:
         env:
           INDEX_URL: "https://pypi.org/simple/"
         run: |
-          python -m pip install ${{ env.PACKAGE_NAME }}==${{ github.ref_name }}
-          ${{ env.PACKAGE_NAME }} --version
+          python -m pip install ${{ env.PROJECT_NAME }}==${{ github.ref_name }}
+          python -c "from ${{ env.PACKAGE_NAME }} import __version__; print(__version__)"
 
   notify-slack:
     if: always()
