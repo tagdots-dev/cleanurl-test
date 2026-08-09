@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.5.0 (2026-08-09)
+## 1.5.2 (2026-08-09)
 
 ### Fix
 
@@ -18,7 +18,7 @@
 
 ### Fix
 
-- remove pre_parsed_path from from _has_valid_tls
+- remove pre_parsed_path from from \_has_valid_tls
 
 ## 1.3.6 (2025-12-18)
 
@@ -34,7 +34,7 @@
 
 ### Feat
 
-- add options (allow_redirect, skip_tls) and fix _has_invalid_expired_cert
+- add options (allow_redirect, skip_tls) and fix \_has_invalid_expired_cert
 
 ## 1.3.3 (2025-12-16)
 
