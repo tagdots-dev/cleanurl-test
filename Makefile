@@ -7,6 +7,7 @@ usage:
 	@echo "\tmake test-only"
 	@echo "\tmake test-plus"
 	@echo "\tmake local-dev"
+	@echo "\tmake pkg-only"
 
 build:
 	@echo "***************************************************************************"
@@ -40,10 +41,16 @@ test-plus:
 	@echo "***************************************************************************"
 	uv sync --only-group test --only-group security
 
+pkg-only:
+	@echo "***************************************************************************"
+	@echo "*** Install only the project package"
+	@echo "***************************************************************************"
+	uv sync --no-default-groups --no-sources
+
 local-dev:
 	@echo "***************************************************************************"
 	@echo "*** Install all dependencies"
 	@echo "***************************************************************************"
 	uv sync --all-groups
 
-.PHONY: help build test local-dev test-only test-plus
+.PHONY: help build test local-dev pkg-only test-only test-plus

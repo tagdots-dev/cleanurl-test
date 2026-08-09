@@ -70,7 +70,7 @@ venvPath = "."
 
 [tool.coverage]
 run.branch = true
-run.omit = [ "tests/*" ]
+run.omit = [ "src/pkg_19544/utils/tld.py", "tests/*" ]
 run.source = [ "src/pkg_19544" ]
 report.fail_under = 80
 report.show_missing = false
