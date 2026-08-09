@@ -3,6 +3,7 @@
 """
 Purpose: tests
 """
+
 import unittest
 
 from pkg_19544.clean_url import (

@@ -3,6 +3,7 @@
 """
 Purpose: tests
 """
+
 import unittest
 
 from pkg_19544.helpers.define import _define_url
@@ -14,13 +15,17 @@ from pkg_19544.helpers.evaluate import (
     _has_valid_fqdn_syntax,
     _has_valid_tld,
 )
-from pkg_19544.helpers.sanitize import _encode_url_components, _remove_control_characters
+from pkg_19544.helpers.sanitize import (
+    _encode_url_components,
+    _remove_control_characters,
+)
 
 
 class TestEvaluateUrl(unittest.TestCase):
     """
     test allowed scheme
     """
+
     def test_has_allowed_scheme_true(self):
         user_url = "https://example.com/path1/path2?key=value#section1.1"
         self.assertTrue(_has_allowed_scheme(user_url))
@@ -33,6 +38,7 @@ class TestEvaluateUrl(unittest.TestCase):
     """
     test userinfo
     """
+
     def test_has_no_basic_auth_true(self):
         userinfo = ""
         self.assertTrue(_has_no_basic_auth(userinfo))
@@ -45,6 +51,7 @@ class TestEvaluateUrl(unittest.TestCase):
     """
     test control character
     """
+
     def test_has_no_control_character_true(self):
         user_url = "https://example.com/path1/path2?key=value#section1.1"
         self.assertTrue(_has_no_control_character(user_url))
@@ -57,6 +64,7 @@ class TestEvaluateUrl(unittest.TestCase):
     """
     test fqdn syntax - localhost
     """
+
     def test_has_valid_fqdn_syntax_true_localhost(self):
         fqdn = "localhost"
         self.assertTrue(_has_valid_fqdn_syntax(fqdn, allow_localhost=True))
@@ -64,6 +72,7 @@ class TestEvaluateUrl(unittest.TestCase):
     """
     test fqdn syntax - not localhost
     """
+
     def test_has_valid_fqdn_syntax_true(self):
         fqdn = "example.com"
         self.assertTrue(_has_valid_fqdn_syntax(fqdn))
@@ -79,12 +88,14 @@ class TestEvaluateUrl(unittest.TestCase):
             return _has_valid_fqdn_syntax(fqdn)
 
     def test_has_valid_fqdn_syntax_false_length_over_255(self):
-        fqdn = "1234567890.1234567890.1234567890.1234567890.1234567890." \
-               "1234567890.1234567890.1234567890.1234567890.1234567890." \
-               "1234567890.1234567890.1234567890.1234567890.1234567890." \
-               "1234567890.1234567890.1234567890.1234567890.1234567890." \
-               "1234567890.1234567890.1234567890.1234567890.1234567890." \
-               "example.com"
+        fqdn = (
+            "1234567890.1234567890.1234567890.1234567890.1234567890."
+            "1234567890.1234567890.1234567890.1234567890.1234567890."
+            "1234567890.1234567890.1234567890.1234567890.1234567890."
+            "1234567890.1234567890.1234567890.1234567890.1234567890."
+            "1234567890.1234567890.1234567890.1234567890.1234567890."
+            "example.com"
+        )
         with self.assertRaises(ValueError):
             return _has_valid_fqdn_syntax(fqdn)
 
@@ -103,14 +114,14 @@ class TestEvaluateUrl(unittest.TestCase):
             return _has_valid_fqdn_syntax(fqdn)
 
     def test_has_valid_fqdn_syntax_label_false_length(self):
-        fqdn = "12345678901234567890123456789012345678901234567890" \
-               "123456789012345678901234.example.com"
+        fqdn = "12345678901234567890123456789012345678901234567890" "123456789012345678901234.example.com"
         with self.assertRaises(ValueError):
             return _has_valid_fqdn_syntax(fqdn)
 
     """
     test authority syntax
     """
+
     def test_has_valid_authority_syntax_true(self):
         authority = "example.com:9090"
         port = "9090"
@@ -143,6 +154,7 @@ class TestEvaluateUrl(unittest.TestCase):
     """
     test tld
     """
+
     def test_has_valid_tld_true(self):
         fqdn = "host.example.com"
         self.assertTrue(_has_valid_tld(fqdn))
@@ -194,20 +206,21 @@ class TestDefineUrl(unittest.TestCase):
     """
     test define url
     """
+
     def test_url_type_origin_success(self):
         user_url = "https://google.com/path1/path2?key=value#section1.1"
-        self.assertTrue(_define_url(user_url, url_type='origin'))
+        self.assertTrue(_define_url(user_url, url_type="origin"))
 
     def test_url_type_redirect_success(self):
         user_url = "https://google.com/path1/path2?key=value#section1.1"
-        self.assertTrue(_define_url(user_url, trailing_path='/webhp', url_type='redirect'))
+        self.assertTrue(_define_url(user_url, trailing_path="/webhp", url_type="redirect"))
 
     def test_url_type_redirect_failure(self):
         user_url = "https://invalidurladdress.com/path1/path2?key=value#section1.1"
         with self.assertRaises(ValueError):
-            _define_url(user_url, trailing_path='/webhp', url_type='redirect')
+            _define_url(user_url, trailing_path="/webhp", url_type="redirect")
 
     def test_url_type_invalid_valueerror(self):
         user_url = "https://google.com/path1/path2?key=value#section1.1"
         with self.assertRaises(ValueError):
-            _define_url(user_url, trailing_path='/webhp', url_type='invalid_url_type')
+            _define_url(user_url, trailing_path="/webhp", url_type="invalid_url_type")
