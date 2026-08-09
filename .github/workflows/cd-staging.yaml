@@ -118,7 +118,7 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: "true"
 
-      - name: Install packages
+      - name: Install main project packages
         shell: bash
         run: uv sync
 
