@@ -55,7 +55,7 @@ jobs:
       - name: Set Build Version
         id: set-build-version
         run: |
-          echo "BUILD_VERSION=$(python src/*/utils/ver.py)" >> "$GITHUB_OUTPUT"
+          echo "BUILD_VERSION=$(uv run python src/*/utils/ver.py)" >> "$GITHUB_OUTPUT"
 
       - name: Get Build Version
         id: get-build-version
