@@ -16,7 +16,13 @@ def get_tlds() -> bool:
 
             with open(TLD_LIST, "w") as f:
                 tld_key = "TLDS"
-                tld_val = str(list_tld).replace(" ", "\r\n    ").replace("['", "[\r\n    '").replace("]", "]\r\n")
+                tld_val = (
+                    str(list_tld)
+                    .replace(" ", "\r\n    ")
+                    .replace("['", "[\r\n    '")
+                    .replace("]", ",\r\n]\r\n")
+                    .replace("'", '"')
+                )
                 f.write(f"{tld_key} = {tld_val}")
             return True
 
