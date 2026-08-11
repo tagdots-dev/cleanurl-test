@@ -13,7 +13,7 @@ env:
   PROJECT_NAME: pkg-19544
   PACKAGE_NAME: pkg_19544
   PYTHON_VERSION: "3.14.x"
-  UV_VERSION: "0.12.0"
+  UV_VERSION: "0.12.3"
 
 permissions:
   contents: read
@@ -137,15 +137,14 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      WORKFLOW_RESULT: ${{ steps.get-previous-jobs-results.outputs.WORKFLOW_RESULT }}
-      TAG_NAME: ${{ steps.get-previous-jobs-results.outputs.TAG_NAME }}
+      WORKFLOW_RESULT: ${{ steps.get-overall-jobs-results.outputs.WORKFLOW_RESULT }}
+      TAG_NAME: ${{ steps.get-overall-jobs-results.outputs.TAG_NAME }}
 
     steps:
       - name: Get overall jobs results
         id: get-overall-jobs-results
         shell: bash
         run: |
-          # get overall result from all of the previous jobs
           if "${{ needs.push-git-tag.result == 'success' && needs.publish-TestPyPI.result == 'success' && needs.validate-TestPyPI.result == 'success' }}"; then
             echo "WORKFLOW_RESULT=:white_check_mark:" >> "$GITHUB_OUTPUT"
           elif "${{ needs.push-git-tag.result == 'skipped' && needs.publish-TestPyPI.result == 'skipped' && needs.validate-TestPyPI.result == 'skipped' }}"; then
@@ -154,7 +153,6 @@ jobs:
             echo "WORKFLOW_RESULT=:no_entry:" >> "$GITHUB_OUTPUT"
           fi
 
-          # get tag name
           if ${{ needs.push-git-tag.outputs.VERSION == '' }}; then
             echo "TAG_NAME=not-available" >> "$GITHUB_OUTPUT"
           else
