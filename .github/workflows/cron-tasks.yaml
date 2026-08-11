@@ -9,7 +9,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.14.x"
-  UV_VERSION: "0.12.0"
+  UV_VERSION: "0.12.3"
 
 permissions:
   actions: read
@@ -59,7 +59,7 @@ jobs:
         id: get-coverage-results
         shell: bash
         run: |
-          echo "COV_RUN=${{ steps.run-coverage.outcome }}"                  >> "$GITHUB_OUTPUT"
+          echo "COV_RUN=${{ steps.run-coverage.outcome }}"                         >> "$GITHUB_OUTPUT"
           echo "COV_PER=$(uv run coverage report | grep TOTAL | awk '{print $6}')" >> "$GITHUB_OUTPUT"
 
       - name: Upload coverage # https://github.com/marketplace/actions/upload-artifact
@@ -90,7 +90,7 @@ jobs:
           label: "Code Coverage"
           message: "${{ needs.pre-badge-coverage.outputs.COV_PER }}"
 
-  stale-workflow-runs: # https://github.com/tagdots/delete-workflow-runs
+  stale-workflow-runs:
     runs-on: ubuntu-latest
 
     permissions:
