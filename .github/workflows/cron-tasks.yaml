@@ -18,7 +18,7 @@ permissions:
   pull-requests: read
 
 jobs:
-%{ if app_type == "python" }
+{% if app_type == "python" %}
   pre-badge-coverage:
     runs-on: ubuntu-latest
 
@@ -73,6 +73,7 @@ jobs:
           retention-days: 1
           overwrite: true
           compression-level: 6
+{% endif %}
 
   badge-coverage:
     runs-on: ubuntu-latest
@@ -90,7 +91,6 @@ jobs:
           badge-url: https://github.com/tagdots-dev/python-test/actions/workflows/cron-tasks.yaml
           label: "Code Coverage"
           message: "${{ needs.pre-badge-coverage.outputs.COV_PER }}"
-%{ endif }
 
   stale-workflow-runs:
     runs-on: ubuntu-latest
@@ -193,11 +193,11 @@ jobs:
         shell: bash
         run: |
           if ${{
-            needs.badge-coverage.result == 'success'
-            && needs.stale-workflow-runs.result == 'success'
-            && needs.stale-issues-prs.result == 'success'
-            && needs.stale-branches.result == 'success'
-            && needs.update-pre-commit.result == 'success'
+            needs.badge-coverage.result == "success"
+            && needs.stale-workflow-runs.result == "success"
+            && needs.stale-issues-prs.result == "success"
+            && needs.stale-branches.result == "success"
+            && needs.update-pre-commit.result == "success"
           }}; then
             echo "WORKFLOW_RESULT=:white_check_mark:" >> "$GITHUB_OUTPUT"
           else
