@@ -192,7 +192,12 @@ jobs:
         id: get-overall-jobs-results
         shell: bash
         run: |
-          if ${{ needs.badge-coverage.result == 'success' && needs.stale-workflow-runs.result == 'success' && needs.stale-issues-prs.result == 'success' && needs.stale-branches.result == 'success' && needs.update-pre-commit.result == 'success' }}; then
+          if ${{
+            needs.badge-coverage.result == 'success'
+            && needs.stale-workflow-runs.result == 'success'
+            && needs.stale-issues-prs.result == 'success'
+            && needs.stale-branches.result == 'success'
+            && needs.update-pre-commit.result == 'success' }}; then
             echo "WORKFLOW_RESULT=:white_check_mark:" >> "$GITHUB_OUTPUT"
           else
             echo "WORKFLOW_RESULT=:no_entry:" >> "$GITHUB_OUTPUT"
