@@ -18,6 +18,7 @@ permissions:
   pull-requests: read
 
 jobs:
+%{ if app_type == "python" }
   pre-badge-coverage:
     runs-on: ubuntu-latest
 
@@ -89,6 +90,7 @@ jobs:
           badge-url: https://github.com/tagdots-dev/python-test/actions/workflows/cron-tasks.yaml
           label: "Code Coverage"
           message: "${{ needs.pre-badge-coverage.outputs.COV_PER }}"
+%{ endif }
 
   stale-workflow-runs:
     runs-on: ubuntu-latest
