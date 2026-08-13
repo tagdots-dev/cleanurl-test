@@ -118,9 +118,9 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: "true"
 
-      - name: Install main project packages
-        shell: bash
-        run: uv sync
+      # - name: Install main project packages
+      #   shell: bash
+      #   run: uv sync
 
       - name: Install package from TestPyPI and run app to show version
         shell: bash
