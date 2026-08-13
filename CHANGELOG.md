@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.5.4 (2026-08-13)
+
+### Refactor
+
+- Fix tld.py to reformat config TLDS
+
 ## 1.5.3 (2026-08-09)
 
 ## 1.5.2 (2026-08-09)
