@@ -5,7 +5,7 @@ from pkg_19544.clean_url import (
     sanitize_url,
 )
 
-__version__ = "1.5.4"
+__version__ = "1.5.5"
 
 
 __all__ = (
