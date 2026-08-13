@@ -20,9 +20,11 @@ classifiers = [
   "Topic :: Software Development :: Build Tools",
 ]
 dependencies = []
-urls.Changelog = "https://www.notavailable.com/changelog"
-urls.Documentation = "https://www.notavailable.com/doc"
-urls.Homepage = "https://www.notavailable.com"
+urls.Changelog = "https://github.com/tagdots-dev/pkg-19544/blob/main/CHANGELOG.md"
+urls.Documentation = "https://github.com/tagdots-dev/pkg-19544/blob/main/README.md"
+urls.Homepage = "https://github.com/tagdots-dev"
+urls.Issues = "https://github.com/tagdots-dev/pkg-19544/issues"
+urls.Repository = "https://github.com/tagdots-dev/pkg-19544"
 
 [dependency-groups]
 dev = [
